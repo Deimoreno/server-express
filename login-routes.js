@@ -28,7 +28,7 @@ router.post("/login", (req, res) => {
     expiresIn: "1h",
   });
 
-  res.json({ message: "Bienvenido", token });
+  res.json({ message: "Welcome", token });
 });
 
 // Ruta protegida que valida el token JWT

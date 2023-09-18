@@ -1,56 +1,64 @@
 const express = require("express");
 const listEditRouter = express.Router();
+const taskList = require("./taskList.json");
 
 //Middleware para validar los valores de la solicitud POST y PUT
 const createValidation = (req, res, next) => {
-  const { id, taskname, description, isCompleted } = req.body;
+  const { taskname, description } = req.body;
 
-  if (!id || !taskname || !description || !isCompleted) {
-    return res.status(400).json({ message: "Invalid info" }); // Devolver un código de respuesta 400 si falta información en el cuerpo de la solicitud
+  if (!taskname || !description) {
+    return res.status(400).json({ message: "Invalid info" });
   }
 
-  req.body.isCompleted = JSON.parse(isCompleted); // Convertir el valor de isCompleted a formato booleano
-
-  next(); // Pasar al siguiente middleware o ruta
+  next();
 };
 
-// Definición del enrutador para la edición de la lista
-module.exports = (taskList) => {
-  // Ruta POST para crear una nueva tarea
-  listEditRouter.post("/create", createValidation, (req, res) => {
-    const newTask = req.body; // Obtener la nueva tarea desde el cuerpo de la solicitud
-    taskList.push(newTask); // Agregar la nueva tarea a la lista
-    res.json(newTask); // Devolver la nueva tarea como respuesta
-  });
+// Ruta POST para crear una tarea
+listEditRouter.post("/create", createValidation, (req, res) => {
+  try {
+    const newTask = req.body;
+    newTask.isCompleted = false;
+    taskList.push(newTask);
+    res.status(201).json({ message: "Task created successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
 
-  // Ruta DELETE para eliminar una tarea por su ID
-  listEditRouter.delete("/delete/:id", (req, res) => {
-    const taskId = parseInt(req.params.id); // Obtener el ID de la tarea desde los parámetros de la URL
-    const index = taskList.findIndex((task) => task.id === taskId); // Buscar el índice de la tarea en la lista
+// Ruta DELETE para eliminar una tarea por su ID
+listEditRouter.delete("/delete/:id", (req, res) => {
+  try {
+    const taskId = parseInt(req.params.id);
+    const index = taskList.findIndex((task) => task.id === taskId);
     if (index !== -1) {
-      // Si se encuentra la tarea
-      const deletedTask = taskList.splice(index, 1); // Eliminar la tarea de la lista
-      res.json(deletedTask); // Devolver la tarea eliminada como respuesta
+      const deletedTask = taskList.splice(index, 1);
+      res.status(200).json({ message: "Task deleted successfully" });
     } else {
-      // Si no se encuentra la tarea
-      res.status(404).json({ message: "Task not found" }); // Devolver un mensaje de error
+      res.status(404).json({ message: "Task not found" });
     }
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
 
-  // Ruta PUT para actualizar una tarea por su ID
-  listEditRouter.put("/update/:id", createValidation, (req, res) => {
-    const taskId = parseInt(req.params.id); // Obtener el ID de la tarea desde los parámetros de la URL
-    const updatedTask = req.body; // Obtener los datos actualizados de la tarea desde el cuerpo de la solicitud
-    const index = taskList.findIndex((task) => task.id === taskId); // Buscar el índice de la tarea en la lista
+// Ruta PUT para actualizar una tarea por su ID
+listEditRouter.put("/update/:id", createValidation, (req, res) => {
+  try {
+    const taskId = parseInt(req.params.id);
+    const updatedTask = req.body;
+    const index = taskList.findIndex((task) => task.id === taskId);
     if (index !== -1) {
-      // Si se encuentra la tarea
-      taskList[index] = { ...taskList[index], ...updatedTask }; // Actualizar la tarea con los nuevos datos
-      res.json(taskList[index]); // Devolver la tarea actualizada como respuesta
+      taskList[index] = { ...taskList[index], ...updatedTask };
+      res.status(200).json({ message: "Task updated successfully" });
     } else {
-      // Si no se encuentra la tarea
-      res.status(404).json({ message: "Task not found" }); // Devolver un mensaje de error
+      res.status(404).json({ message: "Task not found" });
     }
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
 
-  return listEditRouter;
-};
+module.exports = listEditRouter;
