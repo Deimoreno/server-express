@@ -1,6 +1,7 @@
 const express = require("express");
-const port = 8080;
+const port = 3000;
 const app = express();
+const loginRoutes = require("./login-routes");
 
 app.use(express.json()); // Middleware para parsear el cuerpo de las solicitudes como JSON
 
@@ -50,6 +51,7 @@ const listEditRouter = require("./list-edit-router")(taskList); // Ruta para la 
 
 app.use("/list-view", listViewRouter); // Montar el enrutador de vista de lista en el endpoint '/list-view'
 app.use("/list-edit", listEditRouter); // Montar el enrutador de edición de lista en el endpoint '/list-edit'
+app.use(loginRoutes); // Agregar el enrutador de login
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`); // Mensaje de consola para indicar que el servidor está escuchando en el puerto especificado
@@ -59,4 +61,4 @@ app.get("/tasks", (req, res) => {
   res.json(taskList); // Devolver la lista de tareas como respuesta en formato JSON
 });
 
-module.exports = app; // Exportar la aplicación de Express para ser utilizada en otros módulos
+module.exports = app;
